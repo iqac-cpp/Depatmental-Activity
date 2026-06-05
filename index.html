@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Departmental Activity Submission Form</title>
+
+  <style>
+    :root {
+      --blue: #174a78;
+      --blue-2: #236ba4;
+      --light: #eef6ff;
+      --border: #d8e3ef;
+      --text: #1f2937;
+      --muted: #667085;
+      --danger: #b42318;
+      --success: #067647;
+      --card: #ffffff;
+      --warning-bg: #fff7e6;
+      --warning-border: #f6c453;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-width: 0;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      background: #eaf3fb;
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 17px;
+      line-height: 1.45;
+    }
+
+    body {
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    }
+
+    .page {
+      width: 100%;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 14px;
+    }
+
+    .hero {
+      width: 100%;
+      background: linear-gradient(135deg, var(--blue), var(--blue-2));
+      color: white;
+      border-radius: 20px;
+      padding: 22px 18px;
+      margin: 10px 0 14px;
+      box-shadow: 0 8px 22px rgba(23, 74, 120, 0.20);
+    }
+
+    .badge {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.18);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.65rem, 6vw, 2.15rem);
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+    }
+
+    .hero p {
+      margin: 10px 0 0;
+      font-size: clamp(1rem, 3.8vw, 1.1rem);
+      opacity: 0.95;
+    }
+
+    .notice {
+      width: 100%;
+      background: var(--warning-bg);
+      border: 1px solid var(--warning-border);
+      color: #6b4600;
+      border-radius: 16px;
+      padding: 14px;
+      margin: 14px 0;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .status {
+      display: none;
+      width: 100%;
+      border-radius: 16px;
+      padding: 14px;
+      margin: 14px 0;
+      font-size: 1rem;
+      font-weight: 700;
+      word-break: break-word;
+    }
+
+    .status.success {
+      display: block;
+      color: var(--success);
+      background: #ecfdf3;
+      border: 1px solid #75e0a7;
+    }
+
+    .status.error {
+      display: block;
+      color: var(--danger);
+      background: #fef3f2;
+      border: 1px solid #fda29b;
+    }
+
+    form {
+      width: 100%;
+      margin: 0;
+      padding: 0 0 26px;
+    }
+
+    .section-title {
+      margin: 22px 0 10px;
+      font-size: 1rem;
+      color: var(--blue);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .field {
+      width: 100%;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+      margin: 12px 0;
+      box-shadow: 0 5px 16px rgba(16, 24, 40, 0.06);
+    }
+
+    label {
+      display: block;
+      font-size: 1.05rem;
+      font-weight: 800;
+      margin: 0 0 9px;
+      color: #344054;
+    }
+
+    .required {
+      color: var(--danger);
+    }
+
+    input,
+    select,
+    textarea,
+    button {
+      font: inherit;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      min-width: 0;
+      display: block;
+      border: 1px solid #cbd5e1;
+      border-radius: 14px;
+      padding: 13px 14px;
+      background: #ffffff;
+      color: var(--text);
+      outline: none;
+      font-size: 1rem;
+    }
+
+    input,
+    select {
+      min-height: 52px;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--blue-2);
+      box-shadow: 0 0 0 4px rgba(35, 107, 164, 0.14);
+    }
+
+    input[type="file"] {
+      min-height: auto;
+      padding: 12px;
+      background: #f8fafc;
+    }
+
+    .hint {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .counter {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 0.88rem;
+      text-align: right;
+    }
+
+    .submit-wrap {
+      position: sticky;
+      bottom: 0;
+      z-index: 10;
+      width: calc(100% + 28px);
+      margin-left: -14px;
+      padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+      background: rgba(234, 243, 251, 0.94);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(216, 227, 239, 0.9);
+    }
+
+    .submit-btn {
+      width: 100%;
+      border: none;
+      border-radius: 16px;
+      padding: 15px 18px;
+      background: var(--blue);
+      color: #ffffff;
+      font-size: 1.08rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(23, 74, 120, 0.22);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    .small-note {
+      margin-top: 9px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    @media (max-width: 480px) {
+      html,
+      body {
+        font-size: 18px;
+      }
+
+      .page {
+        max-width: none;
+        padding: 10px;
+      }
+
+      .hero {
+        border-radius: 18px;
+        padding: 20px 16px;
+        margin-top: 6px;
+      }
+
+      .field {
+        border-radius: 16px;
+        padding: 15px;
+        margin: 10px 0;
+      }
+
+      input,
+      select,
+      textarea {
+        font-size: 1rem;
+        border-radius: 13px;
+      }
+
+      input,
+      select {
+        min-height: 54px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <section class="hero">
+      <div class="badge">Departmental Activity Documentation</div>
+      <h1>Departmental Activity Submission Form</h1>
+      <p>Fill the details in mobile portrait mode. The PDF will be generated and emailed automatically.</p>
+    </section>
+
+    <div class="notice">
+      Brief description: maximum 90 words or 750 characters. Image captions: maximum 12 words or 90 characters.
+    </div>
+
+    <div id="statusBox" class="status"></div>
+
+    <form id="activityForm">
+      <div class="section-title">Basic Details</div>
+
+      <div class="field">
+        <label for="email">Email Address <span class="required">*</span></label>
+        <input id="email" name="email" type="email" placeholder="example@gdccheepurupalli.ac.in" required />
+        <div class="hint">The generated PDF will be emailed to this address.</div>
+      </div>
+
+      <div class="field">
+        <label for="academicYear">Academic Year <span class="required">*</span></label>
+        <select id="academicYear" name="academicYear" required>
+          <option value="">Select Academic Year</option>
+          <option>2026-27</option>
+          <option>2025-26</option>
+          <option>2024-25</option>
+          <option>2023-24</option>
+          <option>2022-23</option>
+          <option>2021-22</option>
+          <option>2020-21</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="activityName">Name of the Activity <span class="required">*</span></label>
+        <input id="activityName" name="activityName" type="text" placeholder="Example: World Environment Day 2026" required />
+      </div>
+
+      <div class="field">
+        <label for="departmentName">Name of the Department <span class="required">*</span></label>
+        <select id="departmentName" name="departmentName" required>
+          <option value="">Select Department or Cell</option>
+          <option>Department of Telugu</option>
+          <option>Department of Hindi</option>
+          <option>Department of English</option>
+          <option>Department of Sanskrit</option>
+          <option>Department of History</option>
+          <option>Department of Economics</option>
+          <option>Department of Political Science</option>
+          <option>Department of Physical Education</option>
+          <option>Department of Library Science</option>
+          <option>Department of Mathematics</option>
+          <option>Department of Physics</option>
+          <option>Department of Chemistry</option>
+          <option>Department of Botany</option>
+          <option>Department of Zoology</option>
+          <option>Department of Computer Science</option>
+          <option>Department of Commerce</option>
+          <option>Women Empowerment Cell</option>
+          <option>Career Guidance Cell</option>
+          <option>IQAC</option>
+          <option>NSS</option>
+          <option>NCC</option>
+          <option>Eco Club</option>
+          <option>Red Ribbon Club</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="hodLecturerName">Name of the HOD/Lecturer <span class="required">*</span></label>
+        <input id="hodLecturerName" name="hodLecturerName" type="text" placeholder="Example: Dr. K. Jwalamukhi" required />
+      </div>
+
+      <div class="field">
+        <label for="designation">Designation <span class="required">*</span></label>
+        <select id="designation" name="designation" required>
+          <option value="">Select Designation</option>
+          <option>Principal</option>
+          <option>Vice Principal</option>
+          <option>IQAC Coordinator</option>
+          <option>Lecturer</option>
+          <option>Contract Lecturer</option>
+          <option>Guest Faculty</option>
+          <option>HOD</option>
+          <option>Coordinator</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div class="section-title">Programme Details</div>
+
+      <div class="field">
+        <label for="activityDate">Date of Activity Conducted <span class="required">*</span></label>
+        <input id="activityDate" name="activityDate" type="date" required />
+      </div>
+
+      <div class="field">
+        <label for="chiefGuestName">Name of the Chief Guest <span class="required">*</span></label>
+        <input id="chiefGuestName" name="chiefGuestName" type="text" placeholder="Enter chief guest name" required />
+      </div>
+
+      <div class="field">
+        <label for="chiefGuestDesignation">Designation of the Chief Guest <span class="required">*</span></label>
+        <input id="chiefGuestDesignation" name="chiefGuestDesignation" type="text" placeholder="Enter designation and institution" required />
+      </div>
+
+      <div class="field">
+        <label for="studentsParticipated">Total No. of Students Participated <span class="required">*</span></label>
+        <input id="studentsParticipated" name="studentsParticipated" type="number" min="0" step="1" placeholder="Example: 75" required />
+      </div>
+
+      <div class="field">
+        <label for="activityDescription">Brief Description of the Activity <span class="required">*</span></label>
+        <textarea id="activityDescription" name="activityDescription" maxlength="750" placeholder="Write a brief summary within 90 words." required></textarea>
+        <div id="descCounter" class="counter">0 words / 750 characters</div>
+      </div>
+
+      <div class="section-title">Activity Images</div>
+
+      <div class="field">
+        <label for="activityImage1">Activity Image 1 <span class="required">*</span></label>
+        <input id="activityImage1" name="activityImage1" type="file" accept="image/*" required />
+        <div class="hint">Images will be compressed before submission for faster upload.</div>
+      </div>
+
+      <div class="field">
+        <label for="imageDescription1">Description of Image 1 <span class="required">*</span></label>
+        <input id="imageDescription1" name="imageDescription1" type="text" maxlength="90" placeholder="Caption within 12 words" required />
+      </div>
+
+      <div class="field">
+        <label for="activityImage2">Activity Image 2 <span class="required">*</span></label>
+        <input id="activityImage2" name="activityImage2" type="file" accept="image/*" required />
+      </div>
+
+      <div class="field">
+        <label for="imageDescription2">Description of Image 2 <span class="required">*</span></label>
+        <input id="imageDescription2" name="imageDescription2" type="text" maxlength="90" placeholder="Caption within 12 words" required />
+      </div>
+
+      <div class="field">
+        <label for="activityImage3">Activity Image 3 <span class="required">*</span></label>
+        <input id="activityImage3" name="activityImage3" type="file" accept="image/*" required />
+      </div>
+
+      <div class="field">
+        <label for="imageDescription3">Description of Image 3 <span class="required">*</span></label>
+        <input id="imageDescription3" name="imageDescription3" type="text" maxlength="90" placeholder="Caption within 12 words" required />
+      </div>
+
+      <div class="field">
+        <label for="activityImage4">Activity Image 4 <span class="required">*</span></label>
+        <input id="activityImage4" name="activityImage4" type="file" accept="image/*" required />
+      </div>
+
+      <div class="field">
+        <label for="imageDescription4">Description of Image 4 <span class="required">*</span></label>
+        <input id="imageDescription4" name="imageDescription4" type="text" maxlength="90" placeholder="Caption within 12 words" required />
+      </div>
+
+      <div class="submit-wrap">
+        <button id="submitBtn" class="submit-btn" type="submit">Submit Activity</button>
+        <div class="small-note">Please wait after clicking submit. Image upload and PDF generation may take a little time.</div>
+      </div>
+    </form>
+  </main>
+
+  <script>
+    /*
+      IMPORTANT:
+      Paste your deployed Apps Script Web App URL below.
+      It must be the /exec URL from Apps Script deployment.
+    */
+    const SCRIPT_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
+
+    const form = document.getElementById("activityForm");
+    const submitBtn = document.getElementById("submitBtn");
+    const statusBox = document.getElementById("statusBox");
+    const activityDescription = document.getElementById("activityDescription");
+    const descCounter = document.getElementById("descCounter");
+
+    function showStatus(type, message) {
+      statusBox.className = "status " + type;
+      statusBox.textContent = message;
+      statusBox.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function countWords(text) {
+      return String(text || "").trim().split(/\s+/).filter(Boolean).length;
+    }
+
+    function validateWordLimit(value, fieldName, maxWords, maxChars) {
+      const text = String(value || "").trim();
+      const words = countWords(text);
+
+      if (text.length > maxChars) {
+        throw new Error(fieldName + " should not exceed " + maxChars + " characters.");
+      }
+
+      if (words > maxWords) {
+        throw new Error(fieldName + " should not exceed " + maxWords + " words.");
+      }
+    }
+
+    activityDescription.addEventListener("input", function () {
+      const words = countWords(activityDescription.value);
+      const chars = activityDescription.value.length;
+      descCounter.textContent = words + " words / " + chars + " of 750 characters";
+      descCounter.style.color = words > 90 || chars > 750 ? "#b42318" : "#667085";
+    });
+
+    async function resizeImageToBase64(file, maxWidth, quality) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = function (event) {
+          const img = new Image();
+
+          img.onload = function () {
+            const scale = Math.min(1, maxWidth / img.width);
+            const canvas = document.createElement("canvas");
+            canvas.width = Math.round(img.width * scale);
+            canvas.height = Math.round(img.height * scale);
+
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+            const mimeType = "image/jpeg";
+            const dataUrl = canvas.toDataURL(mimeType, quality);
+            const base64 = dataUrl.split(",")[1];
+
+            resolve({
+              base64: base64,
+              mimeType: mimeType,
+              name: file.name.replace(/\.[^/.]+$/, "") + ".jpg"
+            });
+          };
+
+          img.onerror = function () {
+            reject(new Error("Could not process image: " + file.name));
+          };
+
+          img.src = event.target.result;
+        };
+
+        reader.onerror = function () {
+          reject(new Error("Could not read image: " + file.name));
+        };
+
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function buildPayload() {
+      const image1 = document.getElementById("activityImage1").files[0];
+      const image2 = document.getElementById("activityImage2").files[0];
+      const image3 = document.getElementById("activityImage3").files[0];
+      const image4 = document.getElementById("activityImage4").files[0];
+
+      if (!image1 || !image2 || !image3 || !image4) {
+        throw new Error("Please upload all four activity images.");
+      }
+
+      validateWordLimit(activityDescription.value, "Brief Description of the Activity", 90, 750);
+      validateWordLimit(document.getElementById("imageDescription1").value, "Description of Image 1", 12, 90);
+      validateWordLimit(document.getElementById("imageDescription2").value, "Description of Image 2", 12, 90);
+      validateWordLimit(document.getElementById("imageDescription3").value, "Description of Image 3", 12, 90);
+      validateWordLimit(document.getElementById("imageDescription4").value, "Description of Image 4", 12, 90);
+
+      const img1 = await resizeImageToBase64(image1, 1200, 0.78);
+      const img2 = await resizeImageToBase64(image2, 1200, 0.78);
+      const img3 = await resizeImageToBase64(image3, 1200, 0.78);
+      const img4 = await resizeImageToBase64(image4, 1200, 0.78);
+
+      return {
+        email: document.getElementById("email").value.trim(),
+        academicYear: document.getElementById("academicYear").value,
+        activityName: document.getElementById("activityName").value.trim(),
+        departmentName: document.getElementById("departmentName").value,
+        hodLecturerName: document.getElementById("hodLecturerName").value.trim(),
+        designation: document.getElementById("designation").value,
+        activityDate: document.getElementById("activityDate").value,
+        chiefGuestName: document.getElementById("chiefGuestName").value.trim(),
+        chiefGuestDesignation: document.getElementById("chiefGuestDesignation").value.trim(),
+        studentsParticipated: document.getElementById("studentsParticipated").value.trim(),
+        activityDescription: activityDescription.value.trim(),
+
+        imageDescription1: document.getElementById("imageDescription1").value.trim(),
+        imageDescription2: document.getElementById("imageDescription2").value.trim(),
+        imageDescription3: document.getElementById("imageDescription3").value.trim(),
+        imageDescription4: document.getElementById("imageDescription4").value.trim(),
+
+        activityImage1Base64: img1.base64,
+        activityImage1MimeType: img1.mimeType,
+        activityImage1Name: img1.name,
+
+        activityImage2Base64: img2.base64,
+        activityImage2MimeType: img2.mimeType,
+        activityImage2Name: img2.name,
+
+        activityImage3Base64: img3.base64,
+        activityImage3MimeType: img3.mimeType,
+        activityImage3Name: img3.name,
+
+        activityImage4Base64: img4.base64,
+        activityImage4MimeType: img4.mimeType,
+        activityImage4Name: img4.name
+      };
+    }
+
+    form.addEventListener("change", function (event) {
+      const target = event.target;
+
+      if (!target.matches("input, select, textarea")) return;
+
+      setTimeout(() => {
+        const fields = Array.from(form.querySelectorAll("input, select, textarea"))
+          .filter(el => el.type !== "hidden");
+
+        const index = fields.indexOf(target);
+        const next = fields[index + 1];
+
+        if (next) {
+          next.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 250);
+    });
+
+    form.addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      if (!SCRIPT_URL || SCRIPT_URL.includes("PASTE_YOUR_APPS_SCRIPT")) {
+        showStatus("error", "Apps Script Web App URL is missing. Please paste your deployed /exec URL inside SCRIPT_URL.");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting... Please wait";
+
+      try {
+        const payload = await buildPayload();
+
+        /*
+          GitHub Pages and Apps Script are on different domains.
+          mode: "no-cors" allows the submission to reach Apps Script.
+          The browser cannot read the response, so the page shows a safe submitted message.
+        */
+        await fetch(SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          body: JSON.stringify(payload)
+        });
+
+        form.reset();
+        descCounter.textContent = "0 words / 750 characters";
+        showStatus("success", "Submission sent successfully. The PDF will be generated and emailed if all backend settings are correct.");
+
+      } catch (error) {
+        showStatus("error", error.message || "Submission failed. Please try again.");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit Activity";
+      }
+    });
+  </script>
+</body>
+</html>

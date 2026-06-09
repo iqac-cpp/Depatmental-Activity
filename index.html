@@ -307,15 +307,6 @@
       color: var(--muted);
       font-size: 0.9rem;
     }
-
-    .long-description-note {
-      margin-top: 7px;
-      color: #6b4600;
-      font-size: 0.9rem;
-      font-weight: 700;
-    }
-
-
     .preview-panel {
       display: none;
       width: 100%;
@@ -487,14 +478,14 @@
 
 <body>
   <main class="page">
-    <section class="hero">
+    <section id="heroSection" class="hero">
       <div class="badge">GDC Cheepurupalli</div>
       <h1>Departmental Activity Submission Form</h1>
       <p>Fill the details of Activity. The PDF will be generated and emailed automatically.</p>
     </section>
 
-    <div class="notice">
-      Brief description auto-fills from the Important Days reference. You can edit it before submission. Image captions: maximum 12 words or 90 characters.
+    <div id="noticeBox" class="notice">
+      Brief description: maximum 250 words or 1500 characters. Auto-filled descriptions can be edited before submission. Image captions: maximum 12 words or 90 characters.
     </div>
 
     <div id="statusBox" class="status"></div>
@@ -634,10 +625,9 @@
 
       <div class="field">
         <label for="activityDescription">Brief Description of the Activity <span class="required">*</span></label>
-        <textarea id="activityDescription" name="activityDescription" maxlength="3000" placeholder="Auto-filled from important day reference. You can edit it as per the actual programme." required></textarea>
-        <div id="autoFillNote" class="auto-fill-box hidden">Brief description auto-filled from the full Important Days reference. You may edit it before submission.</div>
-        <div class="long-description-note">Note: If you keep a long description, Code.gs must also allow the same limit.</div>
-        <div id="descCounter" class="counter">0 words / 3000 characters</div>
+        <textarea id="activityDescription" name="activityDescription" maxlength="1500" placeholder="Auto-filled from important day reference. You can edit it as per the actual programme." required></textarea>
+        <div id="autoFillNote" class="auto-fill-box hidden">Brief description auto-filled from the Important Days reference. You may edit it before submission. Keep it within 250 words or 1500 characters.</div>
+        <div id="descCounter" class="counter">0 words / 1500 characters</div>
       </div>
 
       <div class="field">
@@ -664,7 +654,7 @@
           <img id="imagePreviewImg1" alt="Activity image 1 preview" />
           <div id="imageStatus1" class="image-status">Image selected.</div>
         </div>
-        <div class="hint">Upload GPS enabled images.</div>
+        <div class="hint">Upload GPS-enabled images. Landscape images fit better in the PDF.</div>
       </div>
 
       <div class="field">
@@ -732,6 +722,8 @@
     const form = document.getElementById("activityForm");
     const submitBtn = document.getElementById("submitBtn");
     const statusBox = document.getElementById("statusBox");
+    const heroSection = document.getElementById("heroSection");
+    const noticeBox = document.getElementById("noticeBox");
     const activityDescription = document.getElementById("activityDescription");
     const descCounter = document.getElementById("descCounter");
     const activityDateInput = document.getElementById("activityDate");
@@ -753,8 +745,8 @@
     let previewImageUrls = [];
 
     const OTHER_ACTIVITY_VALUE = "__OTHER_DEPARTMENTAL_ACTIVITY__";
-    const ACTIVITY_DESCRIPTION_MAX_WORDS = 500;
-    const ACTIVITY_DESCRIPTION_MAX_CHARS = 3000;
+    const ACTIVITY_DESCRIPTION_MAX_WORDS = 250;
+    const ACTIVITY_DESCRIPTION_MAX_CHARS = 1500;
 
     const IMPORTANT_DAYS_BY_DATE = {
   "2026-01-01": [
@@ -3451,6 +3443,7 @@
         resetActivitySelection();
         hidePreview();
         form.classList.add("hidden");
+        if (noticeBox) noticeBox.classList.add("hidden");
 
         for (let i = 1; i <= 4; i++) {
           document.getElementById("imagePreview" + i).classList.remove("active");
@@ -3458,8 +3451,8 @@
           document.getElementById("imageStatus" + i).textContent = "";
         }
 
-        descCounter.textContent = "0 words / 3000 characters";
-        showStatus("success", "Submission sent successfully. The PDF will be generated and emailed if all backend settings are correct.");
+        descCounter.textContent = "0 words / 1500 characters";
+        showStatus("success", "Submission successful. The PDF report will be generated and emailed shortly.");
 
       } catch (error) {
         showStatus("error", error.message || "Submission failed. Please try again.");

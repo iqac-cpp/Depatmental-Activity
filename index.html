@@ -112,6 +112,22 @@
       border: 1px solid #75e0a7;
     }
 
+    .another-activity-btn {
+      display: block;
+      width: 100%;
+      max-width: 320px;
+      margin: 14px auto 0;
+      border: none;
+      border-radius: 14px;
+      padding: 13px 16px;
+      background: var(--blue);
+      color: #ffffff;
+      font-size: 1rem;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(23, 74, 120, 0.18);
+    }
+
     .status.error {
       display: block;
       color: var(--danger);
@@ -3055,6 +3071,22 @@
       statusBox.scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
+    function showSuccessWithAnotherActivityButton() {
+      statusBox.className = "status success";
+      statusBox.innerHTML =
+        '<div>Submission successful. The PDF report has been generated and sent to the submitted email address.</div>' +
+        '<button type="button" id="submitAnotherActivityBtn" class="another-activity-btn">Submit Another Activity</button>';
+
+      const submitAnotherActivityBtn = document.getElementById("submitAnotherActivityBtn");
+      if (submitAnotherActivityBtn) {
+        submitAnotherActivityBtn.addEventListener("click", function () {
+          window.location.reload();
+        });
+      }
+
+      statusBox.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
     function countWords(text) {
       return String(text || "").trim().split(/\s+/).filter(Boolean).length;
     }
@@ -3452,7 +3484,7 @@
         }
 
         descCounter.textContent = "0 words / 1500 characters";
-        showStatus("Submission successful. The PDF report has been generated and sent to the submitted email address.");
+        showSuccessWithAnotherActivityButton();
 
       } catch (error) {
         showStatus("error", error.message || "Submission failed. Please try again.");

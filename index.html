@@ -3102,25 +3102,86 @@
       statusBox.scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
-    function showSuccessWithAnotherActivityButton(mode) {
+
+    function buildAttendanceDashboardUrl(referenceNo) {
+      const params = new URLSearchParams();
+      if (referenceNo) {
+        params.set("ref", referenceNo);
+      }
+      return FACULTY_ATTENDANCE_DASHBOARD_URL + (params.toString() ? "?" + params.toString() : "");
+    }
+
+    function jsonpRequest(url, params) {
+      return new Promise(function (resolve, reject) {
+        const callbackName = "dept_cb_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
+        const query = new URLSearchParams(params || {});
+        query.set("callback", callbackName);
+
+        const script = document.createElement("script");
+        const timer = setTimeout(function () {
+          cleanup();
+          reject(new Error("Request timed out."));
+        }, 30000);
+
+        function cleanup() {
+          clearTimeout(timer);
+          delete window[callbackName];
+          if (script && script.parentNode) {
+            script.parentNode.removeChild(script);
+          }
+        }
+
+        window[callbackName] = function (data) {
+          cleanup();
+          resolve(data);
+        };
+
+        script.onerror = function () {
+          cleanup();
+          reject(new Error("Unable to get activity reference number."));
+        };
+
+        script.src = url + "?" + query.toString();
+        document.body.appendChild(script);
+      });
+    }
+
+    async function getNextActivityReferenceNo() {
+      const data = await jsonpRequest(SCRIPT_URL, {
+        action: "getNextReferenceNo"
+      });
+
+      if (!data || !data.success || !data.referenceNo) {
+        throw new Error((data && data.message) ? data.message : "Unable to generate activity reference number.");
+      }
+
+      return data.referenceNo;
+    }
+
+    function showSuccessWithAnotherActivityButton(mode, referenceNo) {
       statusBox.className = "status success";
 
       if (mode === "attendance") {
+        const dashboardUrl = buildAttendanceDashboardUrl(referenceNo);
+
         statusBox.innerHTML =
-          '<div>Activity submitted successfully. The Faculty Attendance Dashboard has been opened for QR-based student attendance. Please use the activity Reference No from the email or Google Sheet to load the activity in the dashboard.</div>' +
+          '<div><strong>Activity submitted for student attendance.</strong></div>' +
+          '<div style="margin-top:8px;">Activity Reference No:</div>' +
+          '<div style="font-size:1.35rem;font-weight:900;margin-top:4px;color:#174a78;">' + referenceNo + '</div>' +
+          '<div style="margin-top:10px;">Use this reference number in the Faculty Attendance Dashboard. The dashboard button below will open with the Reference No auto-filled.</div>' +
           '<button type="button" id="openAttendanceDashboardBtn" class="another-activity-btn">Open Attendance Dashboard</button>' +
           '<button type="button" id="submitAnotherActivityBtn" class="another-activity-btn">Submit Another Activity</button>';
+
+        const openAttendanceDashboardBtn = document.getElementById("openAttendanceDashboardBtn");
+        if (openAttendanceDashboardBtn) {
+          openAttendanceDashboardBtn.addEventListener("click", function () {
+            window.location.href = dashboardUrl;
+          });
+        }
       } else {
         statusBox.innerHTML =
           '<div>Submission successful. The PDF report has been generated and sent to the submitted email address.</div>' +
           '<button type="button" id="submitAnotherActivityBtn" class="another-activity-btn">Submit Another Activity</button>';
-      }
-
-      const openAttendanceDashboardBtn = document.getElementById("openAttendanceDashboardBtn");
-      if (openAttendanceDashboardBtn) {
-        openAttendanceDashboardBtn.addEventListener("click", function () {
-          window.open(FACULTY_ATTENDANCE_DASHBOARD_URL, "_blank");
-        });
       }
 
       const submitAnotherActivityBtn = document.getElementById("submitAnotherActivityBtn");
@@ -3500,31 +3561,24 @@
       }
 
       const isAttendanceMode = mode === "attendance";
-      let dashboardWindow = null;
-
-      if (isAttendanceMode) {
-        // Open immediately to avoid popup blocker; URL is assigned after submission.
-        dashboardWindow = window.open("", "_blank");
-        if (dashboardWindow) {
-          dashboardWindow.document.write("<p style='font-family:Arial;padding:20px;'>Submitting activity. Attendance dashboard will open shortly...</p>");
-        }
-      }
+      let activityReferenceNo = "";
 
       confirmSubmitBtn.disabled = true;
-      confirmSubmitBtn.textContent = isAttendanceMode ? "Submitting Activity..." : "Generating PDF...";
+      confirmSubmitBtn.textContent = isAttendanceMode ? "Saving Activity..." : "Generating PDF...";
       collectAttendanceBtn.disabled = true;
-      collectAttendanceBtn.textContent = isAttendanceMode ? "Opening Dashboard..." : "Please wait...";
+      collectAttendanceBtn.textContent = isAttendanceMode ? "Preparing Attendance..." : "Please wait...";
       submitBtn.disabled = true;
 
       try {
-        /*
-          GitHub Pages and Apps Script are on different domains.
-          mode: "no-cors" allows the submission to reach Apps Script.
-          The browser cannot read the exact backend response.
-        */
+        if (isAttendanceMode) {
+          activityReferenceNo = await getNextActivityReferenceNo();
+        }
+
         const submissionPayload = Object.assign({}, payload, {
           reportMode: isAttendanceMode ? "ATTENDANCE_REQUIRED" : "PDF_ONLY",
-          studentAttendanceRequired: isAttendanceMode
+          studentAttendanceRequired: isAttendanceMode,
+          referenceNo: activityReferenceNo,
+          preReferenceNo: activityReferenceNo
         });
 
         await fetch(SCRIPT_URL, {
@@ -3548,20 +3602,9 @@
         }
 
         descCounter.textContent = "0 words / 1500 characters";
-        if (isAttendanceMode) {
-          if (dashboardWindow) {
-            dashboardWindow.location.href = FACULTY_ATTENDANCE_DASHBOARD_URL;
-          } else {
-            window.open(FACULTY_ATTENDANCE_DASHBOARD_URL, "_blank");
-          }
-        }
-
-        showSuccessWithAnotherActivityButton(mode);
+        showSuccessWithAnotherActivityButton(mode, activityReferenceNo);
 
       } catch (error) {
-        if (dashboardWindow && !dashboardWindow.closed) {
-          dashboardWindow.close();
-        }
         showStatus("error", error.message || "Submission failed. Please try again.");
       } finally {
         confirmSubmitBtn.disabled = false;

@@ -378,9 +378,34 @@
 
     .preview-actions {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 0.9fr 1.2fr 1.2fr;
       gap: 10px;
       margin-top: 14px;
+    }
+
+    .preview-decision-note {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: #eef6ff;
+      border: 1px solid #c7ddf2;
+      color: var(--blue);
+      font-size: 0.96rem;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .attendance-btn {
+      width: 100%;
+      border: none;
+      border-radius: 16px;
+      padding: 14px 16px;
+      background: #087443;
+      color: #ffffff;
+      font-size: 1.02rem;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(8, 116, 67, 0.18);
     }
 
     .secondary-btn {
@@ -509,9 +534,13 @@
     <section id="previewPanel" class="preview-panel">
       <h2 class="preview-title">Review Before Final Submission</h2>
       <div id="previewContent" class="preview-grid"></div>
+      <div class="preview-decision-note">
+        Select how you want to complete this activity report.
+      </div>
       <div class="preview-actions">
         <button id="editPreviewBtn" type="button" class="secondary-btn">Edit Details</button>
-        <button id="confirmSubmitBtn" type="button" class="submit-btn">Confirm and Submit</button>
+        <button id="confirmSubmitBtn" type="button" class="submit-btn">Generate PDF Only</button>
+        <button id="collectAttendanceBtn" type="button" class="attendance-btn">Collect Student Attendance</button>
       </div>
     </section>
 
@@ -734,6 +763,7 @@
       It must be the /exec URL from Apps Script deployment.
     */
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzS_WZf6TebJl8MSPiAtbSB4qE4j_bVxYYMmcRFrWpDSqtremQsfYp9a4lDnQEdsZOceg/exec";
+    const FACULTY_ATTENDANCE_DASHBOARD_URL = "https://iqac-cpp.github.io/Faculty-Attendance-Dashboard/";
 
     const form = document.getElementById("activityForm");
     const submitBtn = document.getElementById("submitBtn");
@@ -755,6 +785,7 @@
     const previewContent = document.getElementById("previewContent");
     const editPreviewBtn = document.getElementById("editPreviewBtn");
     const confirmSubmitBtn = document.getElementById("confirmSubmitBtn");
+    const collectAttendanceBtn = document.getElementById("collectAttendanceBtn");
 
     let pendingPayload = null;
     let isFinalSubmitConfirmed = false;
@@ -3071,11 +3102,26 @@
       statusBox.scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
-    function showSuccessWithAnotherActivityButton() {
+    function showSuccessWithAnotherActivityButton(mode) {
       statusBox.className = "status success";
-      statusBox.innerHTML =
-        '<div>Submission successful. The PDF report has been generated and sent to the submitted email address.</div>' +
-        '<button type="button" id="submitAnotherActivityBtn" class="another-activity-btn">Submit Another Activity</button>';
+
+      if (mode === "attendance") {
+        statusBox.innerHTML =
+          '<div>Activity submitted successfully. The Faculty Attendance Dashboard has been opened for QR-based student attendance. Please use the activity Reference No from the email or Google Sheet to load the activity in the dashboard.</div>' +
+          '<button type="button" id="openAttendanceDashboardBtn" class="another-activity-btn">Open Attendance Dashboard</button>' +
+          '<button type="button" id="submitAnotherActivityBtn" class="another-activity-btn">Submit Another Activity</button>';
+      } else {
+        statusBox.innerHTML =
+          '<div>Submission successful. The PDF report has been generated and sent to the submitted email address.</div>' +
+          '<button type="button" id="submitAnotherActivityBtn" class="another-activity-btn">Submit Another Activity</button>';
+      }
+
+      const openAttendanceDashboardBtn = document.getElementById("openAttendanceDashboardBtn");
+      if (openAttendanceDashboardBtn) {
+        openAttendanceDashboardBtn.addEventListener("click", function () {
+          window.open(FACULTY_ATTENDANCE_DASHBOARD_URL, "_blank");
+        });
+      }
 
       const submitAnotherActivityBtn = document.getElementById("submitAnotherActivityBtn");
       if (submitAnotherActivityBtn) {
@@ -3447,14 +3493,27 @@
 
     activityDaySelect.addEventListener("change", checkLocalDuplicate);
 
-    async function submitPayloadToBackend(payload) {
+    async function submitPayloadToBackend(payload, mode) {
       if (!SCRIPT_URL || SCRIPT_URL.includes("PASTE_YOUR_APPS_SCRIPT")) {
         showStatus("error", "Apps Script Web App URL is missing. Please paste your deployed /exec URL inside SCRIPT_URL.");
         return;
       }
 
+      const isAttendanceMode = mode === "attendance";
+      let dashboardWindow = null;
+
+      if (isAttendanceMode) {
+        // Open immediately to avoid popup blocker; URL is assigned after submission.
+        dashboardWindow = window.open("", "_blank");
+        if (dashboardWindow) {
+          dashboardWindow.document.write("<p style='font-family:Arial;padding:20px;'>Submitting activity. Attendance dashboard will open shortly...</p>");
+        }
+      }
+
       confirmSubmitBtn.disabled = true;
-      confirmSubmitBtn.textContent = "Submitting... Please wait";
+      confirmSubmitBtn.textContent = isAttendanceMode ? "Submitting Activity..." : "Generating PDF...";
+      collectAttendanceBtn.disabled = true;
+      collectAttendanceBtn.textContent = isAttendanceMode ? "Opening Dashboard..." : "Please wait...";
       submitBtn.disabled = true;
 
       try {
@@ -3463,10 +3522,15 @@
           mode: "no-cors" allows the submission to reach Apps Script.
           The browser cannot read the exact backend response.
         */
+        const submissionPayload = Object.assign({}, payload, {
+          reportMode: isAttendanceMode ? "ATTENDANCE_REQUIRED" : "PDF_ONLY",
+          studentAttendanceRequired: isAttendanceMode
+        });
+
         await fetch(SCRIPT_URL, {
           method: "POST",
           mode: "no-cors",
-          body: JSON.stringify(payload)
+          body: JSON.stringify(submissionPayload)
         });
 
         saveLocalDuplicateRecord();
@@ -3484,13 +3548,26 @@
         }
 
         descCounter.textContent = "0 words / 1500 characters";
-        showSuccessWithAnotherActivityButton();
+        if (isAttendanceMode) {
+          if (dashboardWindow) {
+            dashboardWindow.location.href = FACULTY_ATTENDANCE_DASHBOARD_URL;
+          } else {
+            window.open(FACULTY_ATTENDANCE_DASHBOARD_URL, "_blank");
+          }
+        }
+
+        showSuccessWithAnotherActivityButton(mode);
 
       } catch (error) {
+        if (dashboardWindow && !dashboardWindow.closed) {
+          dashboardWindow.close();
+        }
         showStatus("error", error.message || "Submission failed. Please try again.");
       } finally {
         confirmSubmitBtn.disabled = false;
-        confirmSubmitBtn.textContent = "Confirm and Submit";
+        confirmSubmitBtn.textContent = "Generate PDF Only";
+        collectAttendanceBtn.disabled = false;
+        collectAttendanceBtn.textContent = "Collect Student Attendance";
         submitBtn.disabled = false;
         submitBtn.textContent = "Preview Activity";
       }
@@ -3532,7 +3609,16 @@
         return;
       }
 
-      await submitPayloadToBackend(pendingPayload);
+      await submitPayloadToBackend(pendingPayload, "pdf");
+    });
+
+    collectAttendanceBtn.addEventListener("click", async function () {
+      if (!pendingPayload) {
+        showStatus("error", "Preview data is missing. Please click Preview Activity again.");
+        return;
+      }
+
+      await submitPayloadToBackend(pendingPayload, "attendance");
     });
   </script>
 </body>

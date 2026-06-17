@@ -3162,22 +3162,12 @@
       statusBox.className = "status success";
 
       if (mode === "attendance") {
-        const dashboardUrl = buildAttendanceDashboardUrl(referenceNo);
-
         statusBox.innerHTML =
           '<div><strong>Activity submitted for student attendance.</strong></div>' +
           '<div style="margin-top:8px;">Activity Reference No:</div>' +
           '<div style="font-size:1.35rem;font-weight:900;margin-top:4px;color:#174a78;">' + referenceNo + '</div>' +
-          '<div style="margin-top:10px;">Use this reference number in the Faculty Attendance Dashboard. The dashboard button below will open with the Reference No auto-filled.</div>' +
-          '<button type="button" id="openAttendanceDashboardBtn" class="another-activity-btn">Open Attendance Dashboard</button>' +
+          '<div style="margin-top:10px;">An email has been sent to the faculty email address with the Faculty Attendance Dashboard link, Student Attendance link and QR code.</div>' +
           '<button type="button" id="submitAnotherActivityBtn" class="another-activity-btn">Submit Another Activity</button>';
-
-        const openAttendanceDashboardBtn = document.getElementById("openAttendanceDashboardBtn");
-        if (openAttendanceDashboardBtn) {
-          openAttendanceDashboardBtn.addEventListener("click", function () {
-            window.location.href = dashboardUrl;
-          });
-        }
       } else {
         statusBox.innerHTML =
           '<div>Submission successful. The PDF report has been generated and sent to the submitted email address.</div>' +

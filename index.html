@@ -267,7 +267,72 @@
       font-size: 0.88rem;
     }
 
-    @media (max-width: 480px) {
+    
+    .attendance-success-card {
+      background: linear-gradient(135deg, #eefdf4 0%, #f8fffb 100%);
+      border: 1px solid #80d7a5;
+      border-radius: 22px;
+      padding: 22px;
+      box-shadow: 0 12px 30px rgba(16, 128, 74, 0.10);
+    }
+
+    .attendance-success-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #006b3c;
+      font-size: 1.35rem;
+      font-weight: 900;
+      margin-bottom: 12px;
+    }
+
+    .attendance-success-check {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #07a35a;
+      color: #ffffff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 1.15rem;
+    }
+
+    .attendance-ref-box {
+      display: inline-block;
+      margin: 10px 0 14px;
+      padding: 10px 16px;
+      border-radius: 14px;
+      background: #ffffff;
+      border: 1px solid #bfe8cf;
+      color: var(--blue);
+      font-size: 1.25rem;
+      font-weight: 900;
+      letter-spacing: 0.3px;
+    }
+
+    .attendance-success-text {
+      color: #075f37;
+      font-size: 1rem;
+      font-weight: 700;
+      line-height: 1.55;
+      margin: 8px 0;
+    }
+
+    .attendance-next-steps {
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: #ffffff;
+      border: 1px dashed #9eddb9;
+      color: #164b32;
+      font-size: 0.95rem;
+      font-weight: 700;
+      line-height: 1.5;
+    }
+
+@media (max-width: 480px) {
       html,
       body {
         font-size: 18px;
@@ -522,7 +587,7 @@
     <section id="heroSection" class="hero">
       <div class="badge">GDC Cheepurupalli</div>
       <h1>Departmental Activity Submission Form</h1>
-      <p>Fill the details of Activity. The PDF will be generated and emailed automatically.</p>
+      <p>Fill the activity details and choose either PDF Only or Student Attendance collection.</p>
     </section>
 
     <div id="noticeBox" class="notice">
@@ -3163,11 +3228,14 @@
 
       if (mode === "attendance") {
         statusBox.innerHTML =
-          '<div><strong>Activity submitted for student attendance.</strong></div>' +
-          '<div style="margin-top:8px;">Activity Reference No:</div>' +
-          '<div style="font-size:1.35rem;font-weight:900;margin-top:4px;color:#174a78;">' + referenceNo + '</div>' +
-          '<div style="margin-top:10px;">An email has been sent to the faculty email address with the Faculty Attendance Dashboard link, Student Attendance link and QR code.</div>' +
-          '<button type="button" id="submitAnotherActivityBtn" class="another-activity-btn">Submit Another Activity</button>';
+          '<div class="attendance-success-card">' +
+            '<div class="attendance-success-title"><span class="attendance-success-check">✓</span><span>Student attendance setup completed</span></div>' +
+            '<div class="attendance-success-text">Activity Reference No.</div>' +
+            '<div class="attendance-ref-box">' + referenceNo + '</div>' +
+            '<div class="attendance-success-text">The faculty email has been sent successfully with the attendance dashboard link, student attendance link, and QR code.</div>' +
+            '<div class="attendance-next-steps"><strong>Next step:</strong> Faculty can open the email, share the QR code with students, monitor attendance in the dashboard, and generate the final PDF after attendance collection.</div>' +
+            '<button type="button" id="submitAnotherActivityBtn" class="another-activity-btn">Submit Another Activity</button>' +
+          '</div>';
       } else {
         statusBox.innerHTML =
           '<div>Submission successful. The PDF report has been generated and sent to the submitted email address.</div>' +

@@ -587,7 +587,7 @@
     <section id="heroSection" class="hero">
       <div class="badge">GDC Cheepurupalli</div>
       <h1>Departmental Activity Submission Form</h1>
-      <p>Fill the activity details and choose either PDF Only or Student Attendance collection.</p>
+      <p>Fill the activity details and choose either Submit or Student Attendance collection.</p>
     </section>
 
     <div id="noticeBox" class="notice">
@@ -604,7 +604,7 @@
       </div>
       <div class="preview-actions">
         <button id="editPreviewBtn" type="button" class="secondary-btn">Edit Details</button>
-        <button id="confirmSubmitBtn" type="button" class="submit-btn">Generate PDF Only</button>
+        <button id="confirmSubmitBtn" type="button" class="submit-btn">Submit</button>
         <button id="collectAttendanceBtn" type="button" class="attendance-btn">Collect Student Attendance</button>
       </div>
     </section>
@@ -3622,7 +3622,7 @@
       let activityReferenceNo = "";
 
       confirmSubmitBtn.disabled = true;
-      confirmSubmitBtn.textContent = isAttendanceMode ? "Saving Activity..." : "Generating PDF...";
+      confirmSubmitBtn.textContent = isAttendanceMode ? "Saving Activity..." : "Submitting...";
       collectAttendanceBtn.disabled = true;
       collectAttendanceBtn.textContent = isAttendanceMode ? "Preparing Attendance..." : "Please wait...";
       submitBtn.disabled = true;
@@ -3666,7 +3666,7 @@
         showStatus("error", error.message || "Submission failed. Please try again.");
       } finally {
         confirmSubmitBtn.disabled = false;
-        confirmSubmitBtn.textContent = "Generate PDF Only";
+        confirmSubmitBtn.textContent = "Submit";
         collectAttendanceBtn.disabled = false;
         collectAttendanceBtn.textContent = "Collect Student Attendance";
         submitBtn.disabled = false;
